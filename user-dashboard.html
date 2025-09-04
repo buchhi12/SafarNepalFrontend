@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - SafarNepal</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+    }
+
+    /* Header */
+    header {
+      background-color: #6930cb;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: #194f1a;
+      color: white;
+      position: fixed;
+      top: 70px;
+      bottom: 0;
+      padding: 20px;
+    }
+  .sidebar h3{
+         color:rgb(171, 241, 20);
+  }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 10px 0;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar a:hover {
+      background-color: #28a745;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 240px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #0072ff;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #0072ff;
+      color: white;
+    }
+
+    .btn {
+      text-decoration: none;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 5px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: #040905;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  SafarNepal - User Dashboard
+</header>
+
+<div class="sidebar">
+  <h3>Navigation</h3>
+  <a href="tourismrelated.html">Home</a>
+  <a href="#bookings">My Bookings</a>
+  <a href="#charts">Booking Status</a>
+  
+</div>
+
+<div class="main-content">
+
+  <!-- Bookings Table -->
+  <div class="card" id="bookings">
+    <h2>My Bookings</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Date</th>
+          <th>Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pokhara Tour</td>
+          <td>2025-09-05</td>
+          <td>$1200</td>
+          <td>Confirmed</td>
+        </tr>
+        <tr>
+          <td>Chitwan Safari</td>
+          <td>2025-09-10</td>
+          <td>$900</td>
+          <td>Pending</td>
+        </tr>
+        <tr>
+          <td>Mustang Trek</td>
+          <td>2025-10-01</td>
+          <td>$2300</td>
+          <td>Confirmed</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Booking Chart -->
+  <div class="card" id="charts">
+    <h2>Booking Statistics</h2>
+    <canvas id="bookingChart" width="400" height="200"></canvas>
+  </div>
+
+  <a href="tourismrelated.html" class="btn">Back to Home</a>
+
+</div>
+
+<!-- Chart.js Script -->
+<script>
+  const ctx = document.getElementById('bookingChart').getContext('2d');
+  const bookingChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Pokhara', 'Chitwan', 'Mustang', 'Annapurna'],
+      datasets: [{
+        label: 'Number of Bookings',
+        data: [3, 2, 1, 4],
+        backgroundColor: '#0072ff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

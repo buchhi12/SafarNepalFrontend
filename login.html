@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Auth Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif;}
+    body {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; background: linear-gradient(120deg,#6a11cb,#2575fc);
+      padding: 20px;
+    }
+    .wrapper {
+      width: 100%; max-width: 400px; background: #fff; border-radius: 20px;
+      padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transition: 0.4s ease; overflow: hidden;
+    }
+    .tabs {
+      display: flex; justify-content: space-between; margin-bottom: 25px;
+      border-bottom: 2px solid #eee;
+    }
+    .tabs button {
+      flex: 1; padding: 12px; font-size: 16px; font-weight: 600;
+      background: none; border: none; cursor: pointer; transition: 0.3s;
+      color: #555; position: relative;
+    }
+    .tabs button.active {
+      color: #2575fc;
+    }
+    .tabs button.active::after {
+      content: ""; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 3px; background: #2575fc; border-radius: 2px;
+    }
+    form { display: none; animation: fade 0.4s ease; }
+    form.active { display: block; }
+    @keyframes fade {
+      from {opacity: 0; transform: translateY(15px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    .social {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .social button {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px; border-radius: 8px;
+      border: 1px solid #ddd; cursor: pointer; font-weight: 500;
+      background: #fafafa; transition: 0.3s;
+    }
+    .social button:hover { background: #f0f0f0; }
+    .input_box { margin-bottom: 18px; }
+    .input_box label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; }
+    .input_box input {
+      width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;
+      font-size: 15px; outline: none; transition: 0.3s;
+    }
+    .input_box input:focus { border-color: #2575fc; }
+    .password_box { position: relative; }
+    .toggle_pw {
+      position: absolute; top: 50%; right: 15px; transform: translateY(-50%);
+      cursor: pointer; font-size: 18px; color: #777;
+    }
+    .wrapper button.submit_btn {
+      width: 100%; padding: 14px; background: #2575fc; color: #fff;
+      font-size: 16px; font-weight: 600; border: none; border-radius: 10px;
+      cursor: pointer; margin-top: 10px; transition: 0.3s;
+    }
+    .wrapper button.submit_btn:hover { background: #1d5edb; }
+    .form_footer {
+      text-align: center; margin-top: 15px; font-size: 14px; color: #555;
+    }
+    .form_footer a { color: #2575fc; font-weight: 600; text-decoration: none; }
+    .form_footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab_btn active" onclick="switchForm('login')">Login</button>
+      <button class="tab_btn" onclick="switchForm('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="active">
+      <div class="social">
+        <button><img src="goole.webp" width="18"> Google</button>
+        <button><img src="aap.jpg" width="18"> Apple</button>
+      </div>
+      <div class="input_box">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+      </div>
+      <div class="input_box password_box">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter password" required>
+        <span class="toggle_pw" onclick="togglePassword('loginPassword', this)">👁</span>
+      </div>
+      <button type="submit" class="submit_btn">Log In</button>
+      <div class="form_footer">
+        <p>Don’t have an account? <a href="#" onclick="switchForm('signup')">Sign Up</a></p>
+      </div>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signupForm">
+      <div class="social">
+        <button><img src="goole.webp" width="18"> Google</button>
+        <button><img src="aap.jpg" width="18"> Apple</button>
+      </div>
+      <div class="input_box">
+        <label for="signupName">Full Name</label>
+        <input type="text" id="signupName" placeholder="Enter your name" required>
+      </div>
+      <div class="input_box">
+        <label for="signupEmail">Email</label>
+        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+      </div>
+      <div class="input_box password_box">
+        <label for="signupPassword">Password</label>
+        <input type="password" id="signupPassword" placeholder="Create password" required>
+        <span class="toggle_pw" onclick="togglePassword('signupPassword', this)">👁</span>
+      </div>
+      <div class="input_box password_box">
+        <label for="signupConfirm">Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="Confirm password" required>
+        <span class="toggle_pw" onclick="togglePassword('signupConfirm', this)">👁</span>
+      </div>
+      <button type="submit" class="submit_btn">Sign Up</button>
+      <div class="form_footer">
+        <p>Already have an account? <a href="#" onclick="switchForm('login')">Log In</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function switchForm(type) {
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const tabs = document.querySelectorAll('.tab_btn');
+
+      if (type === 'login') {
+        loginForm.classList.add('active');
+        signupForm.classList.remove('active');
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+      } else {
+        signupForm.classList.add('active');
+        loginForm.classList.remove('active');
+        tabs[1].classList.add('active');
+        tabs[0].classList.remove('active');
+      }
+    }
+
+    function togglePassword(id, el) {
+      const input = document.getElementById(id);
+      if (input.type === "password") {
+        input.type = "text"; el.textContent = "🙈";
+      } else {
+        input.type = "password"; el.textContent = "👁";
+      }
+    }
+
+
+
+
+    // Frontend login simulation
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      // You can add email/password validation here if needed
+      window.location.href = 'user-dashboard.html'; // Redirect only to user dashboard
+    });
+  
+
+
+
+  </script>
+</body>
+</html>
