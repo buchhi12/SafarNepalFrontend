@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Package Details - SafarNepal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00796b;
+      --primary-dark: #004d40;
+      --accent: #ff6f00;
+      --bg: #f0f4f8;
+      --text-dark: #263238;
+      --text-light: #607d8b;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --section-bg: #e3f2fd;
+      --badge-bg: #e0f7fa;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 40px 20px;
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 100;
+      margin: auto;
+      display: flex;
+      gap: 30px;
+    }
+
+    .main {
+      flex: 3;
+      background: var(--white);
+      padding: 35px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      flex: 1;
+      background: var(--white);
+      padding: 25px 30px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      height: fit-content;
+      position: sticky;
+      top: 30px;
+    }
+
+    h2 {
+      font-size: 34px;
+      color: var(--primary);
+      margin-bottom: 25px;
+    }
+
+    .main img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      object-fit: cover;
+      max-height: 400px;
+    }
+
+    .main p {
+      font-size: 17px;
+      color: var(--text-dark);
+      margin-bottom: 25px;
+      line-height: 1.7;
+      background: var(--section-bg);
+      padding: 18px 20px;
+      border-left: 6px solid var(--primary);
+      border-radius: 10px;
+    }
+
+    .main p strong {
+      color: var(--accent);
+    }
+
+    h3 {
+      font-size: 22px;
+      color: var(--primary-dark);
+      margin-top: 35px;
+      margin-bottom: 18px;
+      border-left: 5px solid var(--primary-dark);
+      padding-left: 14px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+    }
+
+    ul li {
+      margin-bottom: 12px;
+      padding: 12px 15px 12px 38px;
+      position: relative;
+      font-size: 15.5px;
+      color: var(--text-light);
+      background-color: #f9f9f9;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    ul li:hover {
+      background-color: #f1fefb;
+    }
+
+    ul li::before {
+      content: "✔";
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .price {
+      font-size: 30px;
+      color: var(--primary-dark);
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .badge {
+      background: var(--badge-bg);
+      color: var(--primary-dark);
+      font-size: 13.5px;
+      padding: 7px 14px;
+      border-radius: 25px;
+      display: inline-block;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .btn {
+      background-color: var(--accent);
+      color: white;
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      display: block;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(255, 111, 0, 0.3);
+    }
+
+    .btn:hover {
+      background-color: #e65100;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 960px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: static;
+        width: 100%;
+        margin-top: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Main Package Content -->
+    <div class="main" id="packageDetails">
+      <h2>Loading...</h2>
+    </div>
+
+    <!-- Booking Sidebar -->
+    <div class="sidebar" id="bookingInfo" style="display: none;">
+      <div class="price" id="priceDisplay">$0</div>
+      <div class="badge">Lowest Price Guarantee</div>
+      <a href="#" id="bookNowBtn" class="btn">Book Now</a>
+    </div>
+  </div>
+
+  <script>
+    async function loadPackageDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) {
+        document.getElementById("packageDetails").innerHTML = "<h2>Package not found!</h2>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:3000/api/packages/${id}`);
+        if (!res.ok) throw new Error('Package not found');
+
+        const pkg = await res.json();
+        const container = document.getElementById("packageDetails");
+
+        container.innerHTML = `
+          <h2>${pkg.name}</h2>
+          <img src="${pkg.image}" alt="${pkg.name}">
+          <p><strong>Description:</strong> ${pkg.description}</p>
+
+          <h3>Itinerary</h3>
+          <ul>${pkg.itinerary.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <h3>Famous Places</h3>
+          <ul>${pkg.famousPlaces.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <h3>Trekking Destinations</h3>
+          <ul>${pkg.trekkingDestinations.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <h3>Activities</h3>
+          <ul>${pkg.activities.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <h3>Includes</h3>
+          <ul>${pkg.includes.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <h3>Excludes</h3>
+          <ul>${pkg.excludes.map(item => `<li>${item}</li>`).join('')}</ul>
+        `;
+
+        // Show price and sidebar
+        document.getElementById("priceDisplay").textContent = `$${pkg.price || 'N/A'}`;
+        document.getElementById("bookingInfo").style.display = "block";
+
+        // Booking button click handler
+        document.getElementById("bookNowBtn").addEventListener("click", function (e) {
+          e.preventDefault();
+          const isLoggedIn = sessionStorage.getItem("userLoggedIn");
+          if (isLoggedIn) {
+            window.location.href = `booking.html?package=${pkg._id}`;
+          } else {
+            window.location.href = "login.html";
+          }
+        });
+
+      } catch (err) {
+        console.error("Error loading package details:", err);
+        document.getElementById("packageDetails").innerHTML = "<h2>Error loading package details.</h2>";
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPackageDetails);
+  </script>
+</body>
+</html>

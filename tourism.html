@@ -237,6 +237,11 @@
       }
       navbar.appendChild(profile);
 
+      // Book now redirects to booking page
+      bookBtn.onclick = e => {
+        e.preventDefault();
+        window.location.href = 'booking.html';
+      }
 
     } else {
       // Not logged in: show Login / Sign Up button
@@ -246,12 +251,16 @@
       loginBtn.innerText = 'Login / Sign Up';
       navbar.appendChild(loginBtn);
 
-    
+      // Book now redirects to login page
+      bookBtn.onclick = e => {
+        e.preventDefault();
+        window.location.href = 'login.html';
+      }
     }
   }
   async function fetchPackages() {
     try {
-      const response = await fetch('http://localhost:3000/api/package'); // replace with your backend URL
+      const response = await fetch('http://localhost:3000/api/packages'); // replace with your backend URL
       const packages = await response.json();
 
       const grid = document.getElementById('packages-grid');

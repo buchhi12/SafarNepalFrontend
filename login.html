@@ -162,19 +162,70 @@
       }
     }
 
-
-
-
-    // Frontend login simulation
-    document.getElementById('loginForm').addEventListener('submit', function(e){
+    // LOGIN
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      // You can add email/password validation here if needed
-      window.location.href = 'user-dashboard.html'; // Redirect only to user dashboard
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch("http://localhost:3000/api/User/login", {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('role', data.role);
+          sessionStorage.setItem('userLoggedIn', "true");
+          window.location.href = "tourismrelated.html";
+        } else {
+          alert(data.message || "Login failed");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Something went wrong. Check your backend server.");
+      }
     });
-  
 
+    // SIGNUP
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('signupName').value;
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirm = document.getElementById('signupConfirm').value;
 
+      if (password !== confirm) {
+        alert("Passwords do not match!");
+        return;
+      }
 
+      try {
+        const res = await fetch("http://localhost:3000/api/User/signup", {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('role', data.role);
+          sessionStorage.setItem('userLoggedIn', "true");
+
+          window.location.href = "tourismrelated.html";
+        } else {
+          alert(data.message || "Signup failed");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Something went wrong. Check your backend server.");
+      }
+    });
   </script>
 </body>
 </html>
+

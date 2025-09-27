@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Package Details - SafarNepal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .details-container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0072ff;
+    }
+
+    p {
+      font-size: 16px;
+      color: #444;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #0072ff;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #0056cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="details-container" id="packageDetails">
+    <h2>Loading...</h2>
+  </div>
+
+  <script>
+    async function loadPackageDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) {
+        document.getElementById("packageDetails").innerHTML = "<h2>Package not found!</h2>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:3000/api/packages/${id}`);
+        if (!res.ok) throw new Error('Package not found');
+
+        const pkg = await res.json();
+
+        const container = document.getElementById("packageDetails");
+        container.innerHTML = `
+          <h2>${pkg.name}</h2>
+          <img src="${pkg.image}" alt="${pkg.name}" style="width:100%; height:auto; border-radius:10px; margin-bottom:15px;">
+          <p><strong>Description:</strong> ${pkg.description}</p>
+          <p><strong>Price:</strong> $${pkg.price || "N/A"}</p>
+          
+          <h3>Itinerary:</h3>
+          <ul>
+            ${pkg.itinerary.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <h3>Famous Places:</h3>
+          <ul>
+            ${pkg.famousPlaces.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <h3>Trekking Destinations:</h3>
+          <ul>
+            ${pkg.trekkingDestinations.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <h3>Activities:</h3>
+          <ul>
+            ${pkg.activities.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <h3>Includes:</h3>
+          <ul>
+            ${pkg.includes.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <h3>Excludes:</h3>
+          <ul>
+            ${pkg.excludes.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+
+          <br>
+          <a href="#" id="bookNowBtn" class="btn">Book Now</a>
+        `;
+        document.getElementById("bookNowBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        
+        // Simulate login check (replace with real auth check later)
+        const isLoggedIn = sessionStorage.getItem("userLoggedIn"); 
+
+        if (isLoggedIn) {
+          // Redirect to booking form with package id
+          window.location.href = `booking.html?package=${pkg._id}`;
+        } else {
+          // Redirect to login page
+          window.location.href = "login.html";
+        }
+      });
+      } catch (err) {
+        console.error("Error loading package details:", err);
+        document.getElementById("packageDetails").innerHTML = "<h2>Error loading package details.</h2>";
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPackageDetails);
+  </script>
+</body>
+</html>

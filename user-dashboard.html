@@ -4,17 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Dashboard - SafarNepal</title>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* General Styles */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f4f6f9;
     }
-
-    /* Header */
     header {
       background-color: #6930cb;
       color: white;
@@ -23,8 +18,6 @@
       font-size: 24px;
       font-weight: bold;
     }
-
-    /* Sidebar */
     .sidebar {
       width: 220px;
       background-color: #194f1a;
@@ -34,9 +27,9 @@
       bottom: 0;
       padding: 20px;
     }
-  .sidebar h3{
-         color:rgb(171, 241, 20);
-  }
+    .sidebar h3 {
+      color: rgb(171, 241, 20);
+    }
     .sidebar a {
       display: block;
       color: white;
@@ -45,17 +38,13 @@
       border-radius: 5px;
       margin-bottom: 5px;
     }
-
     .sidebar a:hover {
       background-color: #28a745;
     }
-
-    /* Main Content */
     .main-content {
       margin-left: 240px;
       padding: 20px;
     }
-
     .card {
       background: white;
       padding: 20px;
@@ -63,44 +52,43 @@
       margin-bottom: 20px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-
     h2 {
       color: #0072ff;
       margin-bottom: 15px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
     }
-
     table, th, td {
       border: 1px solid #ddd;
     }
-
     th, td {
       padding: 12px;
       text-align: left;
     }
-
     th {
       background-color: #0072ff;
       color: white;
     }
-
     .btn {
       text-decoration: none;
-      padding: 10px 20px;
+      padding: 8px 15px;
       background-color: #28a745;
       color: white;
       border-radius: 5px;
       font-weight: bold;
-      display: inline-block;
-      margin-top: 10px;
+      cursor: pointer;
+      border: none;
     }
-
     .btn:hover {
       background-color: #040905;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+    }
+    .btn-delete:hover {
+      background-color: #a71d2a;
     }
   </style>
 </head>
@@ -114,82 +102,121 @@
   <h3>Navigation</h3>
   <a href="tourismrelated.html">Home</a>
   <a href="#bookings">My Bookings</a>
-  <a href="#charts">Booking Status</a>
-  
+  <a href="#" id="logoutBtn" style="color: #ff4d4d;">Logout</a>
 </div>
 
 <div class="main-content">
 
-  <!-- Bookings Table -->
+  <!-- Booking History -->
   <div class="card" id="bookings">
-    <h2>My Bookings</h2>
-    <table>
+    <h2>My Booking History</h2>
+    <table id="bookingTable">
       <thead>
         <tr>
           <th>Package</th>
           <th>Date</th>
           <th>Price</th>
-          <th>Status</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Pokhara Tour</td>
-          <td>2025-09-05</td>
-          <td>$1200</td>
-          <td>Confirmed</td>
-        </tr>
-        <tr>
-          <td>Chitwan Safari</td>
-          <td>2025-09-10</td>
-          <td>$900</td>
-          <td>Pending</td>
-        </tr>
-        <tr>
-          <td>Mustang Trek</td>
-          <td>2025-10-01</td>
-          <td>$2300</td>
-          <td>Confirmed</td>
-        </tr>
+        <!-- Bookings will load here dynamically -->
       </tbody>
     </table>
-  </div>
-
-  <!-- Booking Chart -->
-  <div class="card" id="charts">
-    <h2>Booking Statistics</h2>
-    <canvas id="bookingChart" width="400" height="200"></canvas>
   </div>
 
   <a href="tourismrelated.html" class="btn">Back to Home</a>
 
 </div>
 
-<!-- Chart.js Script -->
 <script>
-  const ctx = document.getElementById('bookingChart').getContext('2d');
-  const bookingChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Pokhara', 'Chitwan', 'Mustang', 'Annapurna'],
-      datasets: [{
-        label: 'Number of Bookings',
-        data: [3, 2, 1, 4],
-        backgroundColor: '#0072ff'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: { beginAtZero: true }
+  const token = sessionStorage.getItem("token");
+
+  // ✅ Fetch bookings for logged-in user
+  async function loadBookings() {
+    try {
+      // 🔥 FIXED ENDPOINT: use your controller route (``)
+      const res = await fetch("http://localhost:3000/api/booking/user", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const bookings = await res.json();
+
+      const tbody = document.querySelector("#bookingTable tbody");
+      tbody.innerHTML = "";
+
+      if (!bookings || bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6">No bookings yet</td></tr>`;
+        return;
       }
+
+      // 🔥 Use the same fields you saved in booking.model.js
+      bookings.forEach(b => {
+        const row = `
+          <tr>
+            <td>${b.packageName || "N/A"}</td>
+            <td>${b.createdAt ? new Date(b.createdAt).toLocaleDateString() : "N/A"}</td>
+            <td>${b.price ? "$" + b.price : "N/A"}</td>
+            <td>${b.email || "N/A"}</td>
+            <td>${b.phone || "N/A"}</td>
+            <td>
+              <button class="btn" onclick="updateBooking('${b._id}', '${b.email}', '${b.phone}')">Update</button>
+              <button class="btn btn-delete" onclick="deleteBooking('${b._id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    } catch (err) {
+      console.error("Error loading bookings:", err);
     }
+  }
+
+  // ✅ Update Booking (change email/phone)
+  async function updateBooking(id, currentEmail, currentPhone) {
+    const newEmail = prompt("Enter new email:", currentEmail);
+    const newPhone = prompt("Enter new phone number:", currentPhone);
+
+    if (!newEmail && !newPhone) return;
+
+    try {
+      await fetch(`http://localhost:3000/api/booking/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: newEmail, phone: newPhone })
+      });
+      alert("Booking updated!");
+      loadBookings();
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  }
+
+  // ✅ Delete Booking (remove permanently)
+  async function deleteBooking(id) {
+    if (!confirm("Are you sure you want to delete this booking?")) return;
+    try {
+      await fetch(`http://localhost:3000/api/booking/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Booking deleted!");
+      loadBookings();
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  }
+
+  // ✅ Logout functionality
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.clear();
+    window.location.href = "tourismrelated.html";
   });
+
+  // ✅ Load bookings when page opens
+  loadBookings();
 </script>
 
 </body>
