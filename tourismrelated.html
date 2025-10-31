@@ -71,6 +71,44 @@
     .logo { display: flex; align-items: center; gap: 12px; }
     .logo img { height: 45px; width: auto; border-radius: 6px; }
     .logo span { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #fff; }
+
+.review-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  width: 280px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.review-card img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.review-card .reviewer {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0072ff;
+}
+
+.review-card .review-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.review-card .review-rating {
+  color: #ffcc00;
+}
+
+
   </style>
 </head>
 <body>
@@ -113,27 +151,27 @@
     <h2>Popular Destinations</h2>
     <div class="grid">
       <div class="card">
-        <img src="kathmandu.jpg" alt="Kathmandu City">
+        <img src="https://res.cloudinary.com/dwmiuoizh/image/upload/v1761449708/kathmandu_gb71tt.jpg" alt="Kathmandu City">
         <h3>Kathmandu</h3>
         <p>The capital city, rich in culture and history.</p>
       </div>
       <div class="card">
-        <img src="pokhara.jpg" alt="Pokhara Lake">
+        <img src="https://res.cloudinary.com/dwmiuoizh/image/upload/v1761448834/pokhara_pbhhpx.jpg" alt="Pokhara Lake">
         <h3>Pokhara</h3>
         <p>Beautiful lakes and gateway to the Annapurna region.</p>
       </div>
       <div class="card">
-        <img src="chitwan.jpg" alt="Chitwan Jungle">
+        <img src="https://res.cloudinary.com/dwmiuoizh/image/upload/v1761448799/chitwan_deuvmw.jpg" alt="Chitwan Jungle">
         <h3>Chitwan</h3>
         <p>Home to wildlife safaris and natural beauty.</p>
       </div>
       <div class="card">
-        <img src="everest.jpg" alt="Mount Everest">
+        <img src="https://res.cloudinary.com/dwmiuoizh/image/upload/v1761398487/everest_x3uru1.jpg" alt="Mount Everest">
         <h3>Everest</h3>
         <p>Majestic peaks and trekking adventures.</p>
       </div>
       <div class="card">
-        <img src="palpa.webp" alt="palpa">
+        <img src="https://res.cloudinary.com/dwmiuoizh/image/upload/v1761449741/palpa_kxyjsj.webp" alt="palpa">
         <h3>Palpa</h3>
         <p>To explore an ancient history, beautiful view and palaces.</p>
       </div>
@@ -168,6 +206,17 @@
       </div>
     </div>
   </section>
+  
+<!-- Latest Reviews Section -->
+<section class="section" id="reviews">
+  <h2>What Our Customers Say</h2>
+  <div class="grid" id="reviews-grid">
+    <!-- Reviews will be dynamically loaded here -->
+  </div>
+</section>
+
+
+
 
   <!-- Contact -->
   <section class="contact-info" id="contact">
@@ -276,8 +325,45 @@
       grid.innerHTML = '<p>Failed to load packages. Please try again later.</p>';
     }
   }
-
   document.addEventListener('DOMContentLoaded', fetchPackages);
+
+  async function fetchReviews() {
+  try {
+    const response = await fetch('http://localhost:3000/api/reviews/latest'); // replace with your backend URL
+    const reviews = await response.json();
+
+    const grid = document.getElementById('reviews-grid');
+    grid.innerHTML = ''; // clear any placeholder
+
+   reviews.slice(0, 4).forEach(review => { // show latest 6 reviews
+  const card = document.createElement('div');
+  card.className = 'review-card';
+
+  const userName = review.user?.name || 'Anonymous';
+  const userImage = review.user?.image || 'user.jpeg';
+
+  card.innerHTML = `
+    <img src="${userImage}" alt="${userName}">
+    <div class="reviewer">${userName}</div>
+    <div class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+    <div class="review-text">${review.comment}</div>
+  `;
+
+  grid.appendChild(card);
+});
+
+
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    const grid = document.getElementById('reviews-grid');
+    grid.innerHTML = '<p>Failed to load reviews. Please try again later.</p>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', fetchReviews);
+
+
+  //document.addEventListener('DOMContentLoaded', fetchPackages);
 
   document.addEventListener('DOMContentLoaded', setupNavbar);
 </script>

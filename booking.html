@@ -73,14 +73,34 @@
 
       <label>Country:</label>
       <input type="text" id="country" name="country" required>
-
-      <button type="submit">Submit</button>
+<button type="button" id="payment" style="background: #5c2d91; margin-bottom: 10px;">Process Your payment</button>      <button type="submit">Submit</button>
     </form>
   </div>
 
   <script>
+     // document.getElementById("khaltiPayBtn").addEventListener("click", function() {
+   // window.location.href = "khaltipayment.html";
+  //});
+
+  // On page load: fill hidden input from URL (or another source)
+const params = new URLSearchParams(window.location.search);
+const packageIdFromURL = params.get("package"); // booking.html?package=<id>
+if (packageIdFromURL) {
+    document.getElementById("packageIdInput").value = packageIdFromURL;
+}
+
+  document.getElementById("payment").addEventListener("click", function() {
+    // Get the packageId from the page or form (hidden input)
+    const packageId = document.getElementById("packageIdInput").value; 
+    window.location.href = `khaltipayment.html?package=${packageId}`;
+});
+
+
 document.getElementById("bookingForm").addEventListener("submit", async function(e) {
   e.preventDefault();
+
+  
+  
 
   const params = new URLSearchParams(window.location.search);
   const packageId = params.get("package"); // make sure this matches the backend route
@@ -100,8 +120,8 @@ document.getElementById("bookingForm").addEventListener("submit", async function
 
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "Booking failed");
-
-    // Redirect to thanks page
+  
+      // Redirect to thanks page
     window.location.href = `thanks.html?booking=${result.booking._id}`;
   } catch (err) {
     console.error(err);

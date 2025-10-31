@@ -227,7 +227,7 @@
     <!-- Create Package Section -->
     <div id="create-package" class="section">
       <h1>Create New Package</h1>
-      <form id="packageForm">
+      <form id="packageForm" enctype="multipart/form-data">
         <div class="input-group">
           <label>Package Name</label>
           <input type="text" name="name" required>
@@ -236,6 +236,10 @@
           <label>Description</label>
           <textarea name="description" rows="3" required></textarea>
         </div>
+        <div class="input-group">
+  <label>Upload Image</label>
+  <input type="file" name="image" id="imageInput" accept="image/*" required>
+</div>
         <div class="input-group">
           <label>Itinerary (comma-separated)</label>
           <textarea name="itinerary" rows="3" required></textarea>
@@ -246,7 +250,7 @@
         </div>
         <div class="input-group">
           <label>Trekking Destinations</label>
-          <input type="text" name="trekkingDestination" required>
+          <input type="text" name="trekkingDestinations" required>
         </div>
         <div class="input-group">
           <label>Activities (comma-separated)</label>
@@ -264,17 +268,20 @@
           <label>Price (USD)</label>
           <input type="number" name="price" required>
         </div>
+
         <button class="btn">Create Package</button>
+        <div id="statusMsg" style="margin-top:10px;font-weight:600;"></div>
       </form>
     </div>
   </div>
+<a onclick="showSection('dashboard', event)" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
   <script>
   function showSection(sectionId) {
     document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
     document.getElementById(sectionId).classList.add('active');
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    event.target.classList.add('active');
+  if (event)  event.target.classList.add('active');
 
     if (sectionId === "bookings") loadBookings();
     if (sectionId === "packages") loadPackages();
@@ -340,43 +347,52 @@
 
   // Create package
   document.getElementById('packageForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const form = event.target;
+  event.preventDefault();
+  const form = event.target;
 
-    const packageData = {
-      name: form.name.value,
-      description: form.description.value,
-      itinerary: form.itinerary.value.split(',').map(i => i.trim()),
-      famousPlaces: form.famousPlaces.value.split(',').map(i => i.trim()),
-      trekkingDestinations: form.trekkingDestination.value,
-      activities: form.activities.value.split(',').map(i => i.trim()),
-      includes: form.includes.value.split(',').map(i => i.trim()),
-      excludes: form.excludes.value.split(',').map(i => i.trim()),
-      price: Number(form.price.value),
-      image: form.image?.value || ""
-    };
+  const formData = new FormData();
+  formData.append('name', form.name.value);
+  formData.append('description', form.description.value);
+  formData.append('itinerary', form.itinerary.value);
+formData.append('famousPlaces', form.famousPlaces.value);
+formData.append('trekkingDestinations', form.trekkingDestinations.value);
+formData.append('activities', form.activities.value);
+formData.append('includes', form.includes.value);
+formData.append('excludes', form.excludes.value);
 
-    try {
-      const res = await fetch('http://localhost:3000/api/packages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-        },
-        body: JSON.stringify(packageData)
-      });
+  formData.append('price', form.price.value);
 
-      if (!res.ok) throw new Error('Failed to create package');
-      await res.json();
-      alert("✅ Package created successfully!");
-      form.reset();
-      loadPackages();
+  const imageFile = document.getElementById('imageInput').files[0];
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
 
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error creating package. Make sure you are logged in as admin.");
-    }
-  });
+  try {
+    const res = await fetch('http://localhost:3000/api/packages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      },
+      body: formData
+    });
+
+    if (!res.ok) throw new Error('Failed to create package');
+
+    const data = await res.json();
+    const statusMsg = document.getElementById('statusMsg');
+    statusMsg.textContent = "✅ Package Created Successfully!";
+    statusMsg.style.color = "#2e7d32";
+
+    form.reset();
+    loadPackages();
+
+    setTimeout(() => statusMsg.textContent = "", 3000);
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error creating package.Make sure you are logged in as admin.");
+  }
+});
+
 
 
   // ✅ Logout functionality
@@ -388,5 +404,6 @@
   
   window.addEventListener('DOMContentLoaded', loadPackages);
   </script>
+
 </body>
 </html>

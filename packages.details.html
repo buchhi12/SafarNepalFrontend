@@ -28,7 +28,7 @@
     }
 
     .container {
-      max-width: 100;
+      max-width: 100%;
       margin: auto;
       display: flex;
       gap: 30px;
@@ -78,10 +78,6 @@
       border-radius: 10px;
     }
 
-    .main p strong {
-      color: var(--accent);
-    }
-
     h3 {
       font-size: 22px;
       color: var(--primary-dark);
@@ -106,20 +102,6 @@
       background-color: #f9f9f9;
       border-left: 4px solid var(--primary);
       border-radius: 8px;
-      transition: background-color 0.3s ease;
-    }
-
-    ul li:hover {
-      background-color: #f1fefb;
-    }
-
-    ul li::before {
-      content: "✔";
-      position: absolute;
-      left: 14px;
-      top: 12px;
-      color: var(--accent);
-      font-weight: bold;
     }
 
     .price {
@@ -150,13 +132,90 @@
       text-decoration: none;
       font-weight: 600;
       transition: background-color 0.3s ease, transform 0.2s ease;
-      box-shadow: 0 4px 10px rgba(255, 111, 0, 0.3);
     }
 
     .btn:hover {
       background-color: #e65100;
       transform: translateY(-2px);
     }
+
+    /* ===== Review Section ===== */
+.review-section {
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 2px solid #ccc;
+}
+
+.review-form {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.review-form textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: none;
+  min-height: 80px;
+  margin-bottom: 10px;
+}
+
+.review-form input[type="file"] {
+  display: block;
+  margin: 10px 0;
+}
+
+/* Unified box for each review */
+.review {
+  background: var(--white); /* single box background */
+  padding: 10px 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* subtle shadow */
+  border: 1px solid #eee; /* optional soft border */
+}
+
+/* User name */
+.review strong {
+  font-size: 12px; /* smaller name */
+  color: var(--primary-dark); /* name color */
+  display: block;
+  text-align: left;
+  padding: 2px 2px;
+  margin-bottom: 1px;
+  background: none; /* remove any background */
+  border: none; /* remove any border */
+}
+
+/* Comment text */
+.review p {
+  font-size: 20px; /* smaller comment */
+  margin: 1px 0;
+  padding: 2px 2px;
+  color: var(--text-dark);
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+/* Images and videos inside the same box */
+.review img {
+  max-width: 100px;
+  margin: 5px 8px 0 0;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.review video {
+  max-width: 150px;
+  margin-top: 8px;
+  border-radius: 5px;
+  display: block;
+}
+
+
 
     @media (max-width: 960px) {
       .container {
@@ -225,13 +284,27 @@
 
           <h3>Excludes</h3>
           <ul>${pkg.excludes.map(item => `<li>${item}</li>`).join('')}</ul>
+
+          <!-- Review Section -->
+          <div class="review-section">
+            <h3>Reviews</h3>
+            <div id="reviewsList">Loading reviews...</div>
+
+            <h3>Leave a Review</h3>
+            <form id="reviewForm" class="review-form" enctype="multipart/form-data">
+              <textarea id="comment" placeholder="Share your experience..." required></textarea>
+              <label>Upload Images (optional)</label>
+              <input type="file" id="images" name="images" multiple accept="image/*" />
+              <label>Upload Videos (optional)</label>
+              <input type="file" id="videos" name="videos" multiple accept="video/*" />
+              <button type="submit" class="btn" style="margin-top: 10px;">Submit Review</button>
+            </form>
+          </div>
         `;
 
-        // Show price and sidebar
         document.getElementById("priceDisplay").textContent = `$${pkg.price || 'N/A'}`;
         document.getElementById("bookingInfo").style.display = "block";
 
-        // Booking button click handler
         document.getElementById("bookNowBtn").addEventListener("click", function (e) {
           e.preventDefault();
           const isLoggedIn = sessionStorage.getItem("userLoggedIn");
@@ -242,9 +315,73 @@
           }
         });
 
+        // Load existing reviews
+        loadReviews(id);
+
+        // Submit new review
+        const reviewForm = document.getElementById("reviewForm");
+        reviewForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData();
+          formData.append("packageId", id);
+          formData.append("comment", document.getElementById("comment").value);
+          const images = document.getElementById("images").files;
+          const videos = document.getElementById("videos").files;
+
+          for (let img of images) formData.append("images", img);
+          for (let vid of videos) formData.append("videos", vid);
+
+          try {
+            const token = sessionStorage.getItem("token");
+            const res = await fetch("http://localhost:3000/api/reviews", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+              alert("Review submitted successfully!");
+              document.getElementById("comment").value = "";
+              loadReviews(id);
+            } else {
+              alert(data.message || "Error submitting review");
+            }
+          } catch (error) {
+            console.error("Error submitting review:", error);
+            alert("Something went wrong!");
+          }
+        });
+
       } catch (err) {
         console.error("Error loading package details:", err);
         document.getElementById("packageDetails").innerHTML = "<h2>Error loading package details.</h2>";
+      }
+    }
+
+    async function loadReviews(packageId) {
+      try {
+        const res = await fetch(`http://localhost:3000/api/reviews/package/${packageId}`);
+        const reviews = await res.json();
+
+        const reviewsList = document.getElementById("reviewsList");
+        if (reviews.length === 0) {
+          reviewsList.innerHTML = "<p>No reviews yet. Be the first to share your experience!</p>";
+          return;
+        }
+
+        reviewsList.innerHTML = reviews.map(r => `
+          <div class="review">
+            <p><strong>${r.user?.name || 'Anonymous'}</strong></p>
+            <p>${r.comment}</p>
+            ${r.images?.length ? r.images.map(img => `<img src="${img}" style="max-width:100px;margin-right:8px;border-radius:5px;">`).join('') : ''}
+            ${r.videos?.length ? r.videos.map(vid => `<video src="${vid}" controls style="max-width:150px;margin-top:8px;"></video>`).join('') : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error("Error loading reviews:", err);
       }
     }
 

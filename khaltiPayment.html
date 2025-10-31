@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Khalti Payment</title>
+  <script src="https://khalti.com/static/khalti-checkout.js"></script>
+</head>
+<body>
+  <button id="payBtn" disabled>Click to Pay with Khalti</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const packageId = params.get("package");
+
+    if (!packageId) {
+      alert("No package selected!");
+      throw new Error("No package selected!");
+    }
+
+    let packageData;
+    let amount;
+
+    // Fetch package details from backend
+    async function fetchPackage() {
+      try {
+        const res = await fetch(`http://localhost:3000/api/packages/${packageId}`);
+        if (!res.ok) throw new Error("Package not found or server error");
+        packageData = await res.json();
+        amount = packageData.price * 100; // convert to paisa
+
+        // Enable button after package is loaded
+        document.getElementById("payBtn").disabled = false;
+      } catch (err) {
+        alert("Failed to load package: " + err.message);
+      }
+    }
+
+    fetchPackage();
+
+    // Click handler
+    document.getElementById("payBtn").addEventListener("click", () => {
+      if (!packageData) return alert("Package data not loaded yet");
+
+      // Configure Khalti widget
+      const checkout = new KhaltiCheckout({
+        publicKey: "test_public_key_XXXXXXXXXXXX", // Use your Khalti test key
+        productIdentity: packageData._id,
+        productName: packageData.name,
+        productUrl: window.location.href,
+        eventHandler: {
+          onSuccess: async (payload) => {
+            // Send token to backend for verification
+            try {
+              const verifyRes = await fetch("http://localhost:3000/api/khalti/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token: payload.token,
+                  amount: payload.amount
+                })
+              });
+              const verifyData = await verifyRes.json();
+              alert(verifyData.message || "Payment verified successfully!");
+            } catch (err) {
+              alert("Payment verification failed: " + err.message);
+            }
+          },
+          onError: (error) => alert("Payment failed!"),
+          onClose: () => console.log("Khalti widget closed")
+        },
+        paymentPreference: ["KHALTI", "EBANKING", "MOBILE_BANKING"]
+      });
+
+      // Open the widget with the amount
+      checkout.show({ amount });
+    });
+  </script>
+</body>
+</html>
